@@ -28,10 +28,10 @@ public class SecurityConfig {
                 .loginPage("/login")
             )
             .logout(logout -> logout
-                    .logoutUrl("/logout")          // ← este é o default, não precisas declarar
+                    .logoutUrl("/logout")
                     .logoutSuccessUrl("/")
-                    .invalidateHttpSession(true)   // ← também default
-                    .deleteCookies("JSESSIONID")   // ← também default
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID")
                     .permitAll()
             );
 

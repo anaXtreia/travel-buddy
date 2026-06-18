@@ -76,7 +76,6 @@ public class AeroportoService {
         return s.trim();
     }
 
-    /** Parser CSV simples que respeita campos entre aspas com vírgulas. */
     private String[] parseCsvLinha(String linha) {
         List<String> campos = new ArrayList<>();
         StringBuilder sb = new StringBuilder();

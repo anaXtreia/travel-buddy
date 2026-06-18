@@ -2,7 +2,6 @@ package com.travelbuddy.controller;
 
 import com.travelbuddy.dto.AeroportoDTO;
 import com.travelbuddy.dto.GuardarViagemDTO;
-import com.travelbuddy.dto.HotelDTO;
 import com.travelbuddy.dto.SearchRequestDTO;
 import com.travelbuddy.dto.TripResponseDTO;
 import com.travelbuddy.dto.VooDTO;
@@ -11,7 +10,6 @@ import com.travelbuddy.service.AeroportoService;
 import com.travelbuddy.service.FlightService;
 import com.travelbuddy.service.ResultadoCache;
 import com.travelbuddy.service.TripSearchService;
-import com.travelbuddy.service.HotelService;
 import com.travelbuddy.service.ViagemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +35,6 @@ public class TravelBuddyController {
     private final ResultadoCache resultadoCache;
     private final FlightService flightService;
     private final ViagemService viagemService;
-    private final HotelService hotelService;
 
     @GetMapping("/")
     public String index() {
@@ -71,20 +68,6 @@ public class TravelBuddyController {
 
         ra.addAttribute("id", id);
         return "redirect:/resultados";
-    }
-
-    @GetMapping("/aguardar")
-    public String aguardar(@RequestParam String id,
-                           Model model,
-                           @AuthenticationPrincipal OAuth2User user) {
-        model.addAttribute("userName", user.getAttribute("name"));
-        model.addAttribute("userPhoto", user.getAttribute("picture"));
-        model.addAttribute("pesquisaId", id);
-
-        ResultadoCache.Entrada entrada = resultadoCache.obter(id);
-        if (entrada != null) model.addAttribute("cidade", entrada.cidade());
-
-        return "aguardar";
     }
 
     @GetMapping("/api/status")
@@ -127,16 +110,6 @@ public class TravelBuddyController {
         }
 
         return "resultados";
-    }
-
-    @GetMapping("/api/hoteis")
-    @ResponseBody
-    public List<HotelDTO> pesquisarHoteis(@RequestParam String cidade,
-                                          @RequestParam double lat,
-                                          @RequestParam double lon,
-                                          @RequestParam(defaultValue = "") String dataInicio,
-                                          @RequestParam(defaultValue = "") String dataFim) {
-        return hotelService.pesquisarHoteis(cidade, dataInicio, dataFim, lat, lon);
     }
 
     @GetMapping("/api/aeroportos")

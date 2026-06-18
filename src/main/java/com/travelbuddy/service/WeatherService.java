@@ -13,7 +13,6 @@ import java.util.Map;
 /**
  * Serviço de Meteorologia: obtém previsão do tempo para coordenadas dadas.
  * Usa a API OpenWeatherMap (forecast de 5 dias).
- * Documentação: https://openweathermap.org/forecast5
  */
 @Slf4j
 @Service
@@ -28,10 +27,6 @@ public class WeatherService {
     @Value("${app.apis.openweather.base-url}")
     private String baseUrl;
 
-    /**
-     * Obtém previsão meteorológica para as coordenadas indicadas.
-     * A API devolve previsões para os próximos 5 dias.
-     */
     public MeteorologiaDTO obterMeteorologiaPorCoordenadas(double lat, double lon) {
         log.info("A obter meteorologia para lat={}, lon={}", lat, lon);
 
@@ -45,9 +40,6 @@ public class WeatherService {
         return parseMeteorologiaResponse(response);
     }
 
-    /**
-     * Processa a resposta JSON da OpenWeatherMap e extrai os dados relevantes.
-     */
     private MeteorologiaDTO parseMeteorologiaResponse(Map<?, ?> response) {
         MeteorologiaDTO dto = new MeteorologiaDTO();
 

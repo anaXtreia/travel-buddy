@@ -12,8 +12,6 @@ import java.util.Map;
 /**
  * Serviço de Geocoding: converte nome de cidade em coordenadas (lat/lon).
  * Usa a API Geoapify Geocoding.
- *
- * Documentação: https://apidocs.geoapify.com/docs/geocoding/
  */
 @Slf4j
 @Service
@@ -28,22 +26,16 @@ public class GeocodingService {
     @Value("${app.apis.geoapify.base-url}")
     private String baseUrl;
 
-    /**
-     * Recebe o nome de uma cidade e devolve as suas coordenadas.
-     * Exemplo: "Punta Cana" → { lat: 18.58, lon: -68.40 }
-     */
     public CoordenadasDTO geocodificar(String cidade) {
         log.info("A geocodificar cidade: {}", cidade);
 
-        // Chama a API Geoapify
         Map response = webClient.get()
                 .uri(baseUrl + "/geocode/search?text={cidade}&apiKey={key}&lang=pt&limit=1",
                         cidade, apiKey)
                 .retrieve()
                 .bodyToMono(Map.class)
-                .block(); // block() converte chamada assíncrona em síncrona
+                .block();
 
-        // Extrai coordenadas da resposta JSON
         try {
             var features = (java.util.List<?>) response.get("features");
             if (features == null || features.isEmpty()) {

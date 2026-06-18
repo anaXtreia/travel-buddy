@@ -38,7 +38,6 @@ public class ResultadoCache {
         cache.remove(id);
     }
 
-    // Limpa entradas expiradas a cada 5 minutos
     @Scheduled(fixedDelay = 5 * 60 * 1000)
     public void limparExpiradas() {
         int antes = cache.size();
