@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+
+  # Base de dados PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: travelbuddy-db
+    environment:
+      POSTGRES_DB: travelbuddydb
+      POSTGRES_USER: ${DB_USER:-travelbuddy}
+      POSTGRES_PASSWORD: ${DB_PASS:-travelbuddy123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U travelbuddy -d travelbuddydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin — interface web para gerir o PostgreSQL (http://localhost:5050)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: travelbuddy-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Aplicação Spring Boot
+  app:
+    build: .
+    container_name: travelbuddy-app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/travelbuddydb
+      DB_USER: ${DB_USER:-travelbuddy}
+      DB_PASS: ${DB_PASS:-travelbuddy123}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GEOAPIFY_KEY: ${GEOAPIFY_KEY}
+      OPENWEATHER_KEY: ${OPENWEATHER_KEY}
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  pgadmin_data:

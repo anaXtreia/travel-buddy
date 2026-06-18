@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: travel-buddy
+
+  # Base de dados PostgreSQL
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/travelbuddydb}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  # OAuth2 Google
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+# Chaves das APIs externas (define como variáveis de ambiente)
+app:
+  apis:
+    geoapify:
+      key: ${GEOAPIFY_KEY}
+      base-url: https://api.geoapify.com/v1
+    openweather:
+      key: ${OPENWEATHER_KEY}
+      base-url: https://api.openweathermap.org/data/2.5
+    rapidapi:
+      key: ${RAPIDAPI_KEY}
+    booking:
+      host: booking-com15.p.rapidapi.com
+      base-url: https://booking-com15.p.rapidapi.com
+    googleflights:
+      host: google-flights2.p.rapidapi.com
+      base-url: https://google-flights2.p.rapidapi.com
+
+logging:
+  level:
+    com.travelbuddy: DEBUG
+    org.springframework.security: INFO

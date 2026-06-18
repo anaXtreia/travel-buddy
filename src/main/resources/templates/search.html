@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Buddy — Pesquisa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f2342 0%, #1a4a8a 50%, #2563eb 100%);
+            min-height: 100vh;
+        }
+        .navbar-custom { background: rgba(0,0,0,0.25); backdrop-filter: blur(10px); }
+        .search-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+        }
+        .hero-title { font-size: 2.8rem; font-weight: 800; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .hero-sub { color: rgba(255,255,255,0.82); font-size: 1.1rem; }
+        .form-label { font-weight: 600; color: #374151; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-control { border-radius: 10px; border: 1.5px solid #e5e7eb; padding: 0.65rem 1rem; }
+        .form-control:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .btn-search {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none; border-radius: 10px;
+            padding: 0.7rem 1.5rem; font-weight: 700; font-size: 1rem;
+        }
+        .btn-search:hover { background: linear-gradient(135deg, #1d4ed8, #1e40af); transform: translateY(-1px); }
+        .autocomplete-wrapper { position: relative; }
+        .autocomplete-list {
+            position: absolute; top: 100%; left: 0; right: 0; z-index: 1000;
+            background: white; border: 1.5px solid #e5e7eb; border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 240px; overflow-y: auto;
+            display: none;
+        }
+        .autocomplete-list.show { display: block; }
+        .autocomplete-item {
+            padding: 0.6rem 1rem; cursor: pointer; border-bottom: 1px solid #f3f4f6;
+            font-size: 0.9rem;
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item.active { background: #eff6ff; }
+        .autocomplete-item .iata { font-weight: 700; color: #2563eb; margin-right: 0.4rem; }
+        .autocomplete-item .pais { color: #6b7280; font-size: 0.8rem; }
+        .divider { height: 1px; background: #e5e7eb; margin: 1.2rem 0; }
+        .section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+                         letter-spacing: 0.08em; color: #6b7280; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-custom px-4 py-2">
+    <span class="navbar-brand fw-bold text-white fs-5">✈️ Travel Buddy</span>
+    <div class="d-flex align-items-center gap-3">
+        <img th:src="${userPhoto}" class="rounded-circle" width="34" height="34" alt="foto">
+        <span class="text-white fw-medium" th:text="${userName}">Utilizador</span>
+        <a href="/viagens" class="btn btn-outline-light btn-sm px-3">🗺️ As minhas viagens</a>
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn btn-outline-light btn-sm px-3">Sair</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container py-5">
+    <div class="text-center mb-5 pt-3">
+        <div style="font-size:3.5rem">✈️</div>
+        <h1 class="hero-title mt-2">Para onde queres ir?</h1>
+        <p class="hero-sub mt-1">Hotéis, voos e meteorologia numa só pesquisa</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+            <div class="search-card p-4 p-md-5">
+
+                <form th:action="@{/pesquisar}" method="post">
+
+                    <p class="section-label">Destino</p>
+                    <div class="mb-3">
+                        <label class="form-label">Cidade</label>
+                        <input type="text" name="cidade" class="form-control form-control-lg"
+                               placeholder="Ex: Paris, Lisboa, Nova Iorque…"
+                               th:value="${searchRequest?.cidade}" required style="font-size:1rem">
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <p class="section-label">Datas</p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label">Check-in / Partida</label>
+                            <input type="date" name="dataInicio" class="form-control"
+                                   th:value="${searchRequest?.dataInicio}" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Check-out / Regresso</label>
+                            <input type="date" name="dataFim" class="form-control"
+                                   th:value="${searchRequest?.dataFim}" required>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <p class="section-label">Voos <span class="fw-normal text-muted" style="text-transform:none;letter-spacing:0">(opcional)</span></p>
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <label class="form-label">Aeroporto de origem</label>
+                            <div class="autocomplete-wrapper">
+                                <input type="text" id="origemDisplay" class="form-control"
+                                       placeholder="Ex: Lisboa, LIS…" autocomplete="off">
+                                <input type="hidden" name="aeroportoOrigem" id="aeroportoOrigem">
+                                <div class="autocomplete-list" id="origemList"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Aeroporto de destino</label>
+                            <div class="autocomplete-wrapper">
+                                <input type="text" id="destinoDisplay" class="form-control"
+                                       placeholder="Ex: Paris, CDG…" autocomplete="off">
+                                <input type="hidden" name="aeroportoDestino" id="aeroportoDestino">
+                                <div class="autocomplete-list" id="destinoList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-search btn-primary w-100 text-white">
+                        🔍 &nbsp;Pesquisar
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function criarAutocomplete(inputDisplay, inputHidden, listEl) {
+        let activeIndex = -1;
+        let resultados = [];
+
+        inputDisplay.addEventListener('input', async function () {
+            const q = this.value.trim();
+            activeIndex = -1;
+            if (q.length < 2) { listEl.classList.remove('show'); return; }
+            try {
+                const resp = await fetch('/api/aeroportos?q=' + encodeURIComponent(q));
+                resultados = await resp.json();
+                renderLista();
+            } catch (e) { console.error(e); }
+        });
+
+        function renderLista() {
+            listEl.innerHTML = '';
+            if (resultados.length === 0) { listEl.classList.remove('show'); return; }
+            resultados.forEach((a, i) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = `<span class="iata">${a.iata}</span>
+                                  <span class="cidade">${a.cidade}</span>
+                                  <span class="pais ms-1">· ${a.nome}</span>`;
+                item.addEventListener('mousedown', () => selecionar(a));
+                listEl.appendChild(item);
+            });
+            listEl.classList.add('show');
+        }
+
+        function selecionar(aeroporto) {
+            inputDisplay.value = aeroporto.cidade + ' (' + aeroporto.iata + ')';
+            inputHidden.value  = aeroporto.iata;
+            listEl.classList.remove('show');
+        }
+
+        inputDisplay.addEventListener('keydown', function (e) {
+            const items = listEl.querySelectorAll('.autocomplete-item');
+            if (e.key === 'ArrowDown') {
+                activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            } else if (e.key === 'ArrowUp') {
+                activeIndex = Math.max(activeIndex - 1, 0);
+            } else if (e.key === 'Enter' && activeIndex >= 0) {
+                e.preventDefault();
+                selecionar(resultados[activeIndex]);
+                return;
+            } else if (e.key === 'Escape') {
+                listEl.classList.remove('show');
+                return;
+            }
+            items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!inputDisplay.contains(e.target) && !listEl.contains(e.target)) {
+                listEl.classList.remove('show');
+            }
+        });
+    }
+
+    criarAutocomplete(
+        document.getElementById('origemDisplay'),
+        document.getElementById('aeroportoOrigem'),
+        document.getElementById('origemList')
+    );
+    criarAutocomplete(
+        document.getElementById('destinoDisplay'),
+        document.getElementById('aeroportoDestino'),
+        document.getElementById('destinoList')
+    );
+</script>
+
+</body>
+</html>
