@@ -1,9 +1,12 @@
 # Ficheiro .env com as chaves das APIs (NUNCA commites isto)
 .env
+.env.*
+!.env.example
 
 # Build do Maven
 target/
 *.jar
+!.mvn/wrapper/maven-wrapper.jar
 *.class
 
 # IntelliJ IDEA

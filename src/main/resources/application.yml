@@ -48,5 +48,5 @@ app:
 
 logging:
   level:
-    com.travelbuddy: DEBUG
+    com.travelbuddy: INFO
     org.springframework.security: INFO

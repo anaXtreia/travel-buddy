@@ -8,14 +8,14 @@ services:
     container_name: travelbuddy-db
     environment:
       POSTGRES_DB: travelbuddydb
-      POSTGRES_USER: ${DB_USER:-travelbuddy}
-      POSTGRES_PASSWORD: ${DB_PASS:-travelbuddy123}
+      POSTGRES_USER: ${DB_USER:?Define DB_USER no ficheiro .env}
+      POSTGRES_PASSWORD: ${DB_PASS:?Define DB_PASS no ficheiro .env}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U travelbuddy -d travelbuddydb"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,8 +25,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: travelbuddy-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:?Define PGADMIN_EMAIL no ficheiro .env}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?Define PGADMIN_PASSWORD no ficheiro .env}
     ports:
       - "5050:80"
     depends_on:
@@ -42,8 +42,8 @@ services:
       - "8080:8080"
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/travelbuddydb
-      DB_USER: ${DB_USER:-travelbuddy}
-      DB_PASS: ${DB_PASS:-travelbuddy123}
+      DB_USER: ${DB_USER:?Define DB_USER no ficheiro .env}
+      DB_PASS: ${DB_PASS:?Define DB_PASS no ficheiro .env}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GEOAPIFY_KEY: ${GEOAPIFY_KEY}

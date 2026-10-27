@@ -152,7 +152,14 @@
     async function apagarViagem(id, btn) {
         if (!confirm('Apagar esta viagem?')) return;
         try {
-            const resp = await fetch('/api/viagens/' + id, { method: 'DELETE' });
+            const token = decodeURIComponent(document.cookie
+                .split('; ')
+                .find(cookie => cookie.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1] || '');
+            const resp = await fetch('/api/viagens/' + id, {
+                method: 'DELETE',
+                headers: { 'X-XSRF-TOKEN': token }
+            });
             if (!resp.ok) throw new Error();
             btn.closest('.col-lg-6').remove();
         } catch {

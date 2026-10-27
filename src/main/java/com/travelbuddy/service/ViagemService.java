@@ -59,7 +59,7 @@ public class ViagemService {
         v.setVooRegressoDuracaoMinutos(dto.getVooRegressoDuracaoMinutos());
 
         Viagem guardada = repository.save(v);
-        log.info("Viagem guardada: id={}, utilizador={}, cidade={}", guardada.getId(), emailUtilizador, dto.getCidade());
+        log.info("Viagem guardada: id={}, cidade={}", guardada.getId(), dto.getCidade());
         return guardada;
     }
 

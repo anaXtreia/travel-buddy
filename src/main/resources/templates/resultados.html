@@ -391,7 +391,13 @@
         try {
             const resp = await fetch('/api/viagens', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': decodeURIComponent(document.cookie
+                        .split('; ')
+                        .find(cookie => cookie.startsWith('XSRF-TOKEN='))
+                        ?.split('=')[1] || '')
+                },
                 body: JSON.stringify(payload)
             });
             if (!resp.ok) throw new Error();
